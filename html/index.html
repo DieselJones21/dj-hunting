@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rebel Hunting</title>
+  <style>html,body{background:transparent!important;background-color:transparent!important;}</style>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="hud" class="hud hidden" aria-hidden="true">
+    <div class="hud-brand">
+      <svg class="hud-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M24 6c-3 7-10 11-16 12 8 2 13 8 16 24 3-16 8-22 16-24-6-1-13-5-16-12z" fill="currentColor"/>
+      </svg>
+      <div>
+        <strong id="hud-zone">Paleto Forest</strong>
+        <small id="hud-hint">Lodge woods</small>
+      </div>
+    </div>
+    <div class="hud-meta">
+      <span id="hud-level">L1</span>
+      <span id="hud-status">Glassing the line</span>
+    </div>
+    <div class="hud-bar"><i id="hud-xp"></i></div>
+  </div>
+
+  <div id="app" class="hidden" aria-hidden="true">
+    <div class="shell">
+      <div class="orb orb-a"></div>
+      <div class="orb orb-b"></div>
+      <div class="orb orb-c"></div>
+
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 72 72">
+              <path d="M36 8c-5 11-16 17-26 19 13 3 21 13 26 37 5-24 13-34 26-37-10-2-21-8-26-19z"/>
+              <path d="M22 28c4 2 8 2 14 2s10 0 14-2" fill="none" stroke="currentColor" stroke-width="2.2"/>
+            </svg>
+          </div>
+          <div>
+            <strong id="shop-title">Rebel Outfitters</strong>
+            <small id="shop-subtitle">Ranger Lodge</small>
+          </div>
+        </div>
+
+        <nav class="nav" id="nav" aria-label="Shop sections"></nav>
+
+        <div class="profile">
+          <div class="profile-copy">
+            <strong id="player-name">Hunter</strong>
+            <span id="player-role">Licensed Rebel hunter</span>
+          </div>
+          <div class="avatar" id="player-avatar">RR</div>
+        </div>
+      </header>
+
+      <section class="stats" id="stats"></section>
+
+      <div class="toolbar">
+        <div class="tabs" id="tabs"></div>
+        <label class="search" id="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16.5 16.5 21 21"/></svg>
+          <input id="search" type="text" placeholder="Search Rebel gear..." autocomplete="off" spellcheck="false" maxlength="64" aria-label="Search" />
+        </label>
+      </div>
+
+      <main class="content" id="content"></main>
+
+      <footer class="footer">
+        <span class="footer-brand">
+          <svg viewBox="0 0 48 48" width="22" height="22" aria-hidden="true"><path d="M24 6c-3 7-10 11-16 12 8 2 13 8 16 24 3-16 8-22 16-24-6-1-13-5-16-12z" fill="currentColor"/></svg>
+          REBEL ROLEPLAY
+        </span>
+        <span class="keychip">ESC Close</span>
+      </footer>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
