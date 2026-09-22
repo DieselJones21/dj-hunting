@@ -716,7 +716,7 @@ async function handleResult(result, fallback) {
 }
 
 function applyHud(data) {
-  if (!data || !data.visible) {
+  if (!data || !data.visible || !app.classList.contains('hidden')) {
     hudEl.classList.add('hidden');
     hudEl.setAttribute('aria-hidden', 'true');
     return;

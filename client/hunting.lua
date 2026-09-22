@@ -315,6 +315,10 @@ local function updateMovement()
 end
 
 local function pushHud()
+    if IsShopOpen() then
+        SendNUIMessage({ action = 'hud', data = { visible = false } })
+        return
+    end
     local h = HunterState.hunter or {}
     local allowed, status = canSpawn()
     if allowed then status = #spawned > 0 and 'ready' or 'searching' end
