@@ -49,7 +49,7 @@ The store catalog is `data/equipment.lua`. Item keys are the ox_inventory names 
 
 1. Go to **Rebel Ranger Lodge** (Paleto Forest cabin) and buy a **hunting license** from the ranger ped. Outfitters will not sell gear without it.
 2. Buy a **Skinning Axe** (or a hatchet / knife) and any ranked gun.
-3. Walk into a hunting ground. Animals only spawn while you are **moving**. Stand still and the woods dry up.
+3. Walk into a hunting ground. The hunt HUD and camp / woods alerts **only appear inside a marked ground**. Animals only spawn while you are **moving**. Stand still and the woods dry up.
 4. Kill with a **licensed hunting gun**. Other weapons do not count.
 5. Walk up to the carcass and harvest (interact or **E**). You must have an axe / hatchet / knife. You get **meat, hide, and bone** — trophies on deer, mountain lion, and panther.
 6. After a harvest you must **walk ~48m** and wait **28s** before the next animal will show. No sitting and shooting.

@@ -10,6 +10,7 @@ local lastMoveAt = 0
 local camped = false
 local lastWeapon = 0
 local hudStatus = 'idle'
+local lastZoneId
 
 local function isDead()
     local ped = cache.ped
@@ -293,7 +294,43 @@ local function canSpawn()
     return true, 'ready'
 end
 
+local function inHuntZone()
+    return CurrentZone ~= nil
+end
+
+local function fieldNotify(key, nType, ...)
+    if not Config.ShowFieldAlert(inHuntZone()) then
+        return
+    end
+    Notify(key, nType, ...)
+end
+
+function HideHuntHud()
+    camped = false
+    lastMovePos = nil
+    lastMoveAt = 0
+    lastZoneId = nil
+    hudStatus = 'idle'
+    lib.hideTextUI()
+    SendNUIMessage({ action = 'hud', data = { visible = false } })
+end
+
 local function updateMovement()
+    if not inHuntZone() then
+        if camped or lastMovePos or lastZoneId then
+            HideHuntHud()
+        end
+        return
+    end
+
+    if lastZoneId ~= CurrentZone.id then
+        lastZoneId = CurrentZone.id
+        lastMovePos = GetEntityCoords(cache.ped)
+        lastMoveAt = GetGameTimer()
+        camped = false
+        return
+    end
+
     local coords = GetEntityCoords(cache.ped)
     if not lastMovePos then
         lastMovePos = coords
@@ -309,20 +346,19 @@ local function updateMovement()
     elseif (GetGameTimer() - lastMoveAt) >= (Config.Hunt.stillTimeout * 1000) then
         if not camped then
             camped = true
-            Notify('notify_camped', 'inform')
+            fieldNotify('notify_camped', 'inform')
         end
     end
 end
 
 local function pushHud()
-    if IsShopOpen() then
+    if IsShopOpen() or not inHuntZone() then
         SendNUIMessage({ action = 'hud', data = { visible = false } })
         return
     end
     local h = HunterState.hunter or {}
     local allowed, status = canSpawn()
     if allowed then status = #spawned > 0 and 'ready' or 'searching' end
-    if not CurrentZone then status = 'idle' end
     hudStatus = status
 
     local cooldownLeft = 0
@@ -360,6 +396,7 @@ CreateThread(function()
             if #spawned > 0 then
                 despawnAll()
             end
+            lib.hideTextUI()
         end
         pushHud()
         Wait(wait)
@@ -394,7 +431,7 @@ CreateThread(function()
                         entry.weapon = cause
                         lastWeapon = cause
                         if Config.Hunt.requireHuntingWeapon and not legalWeapon(cause) then
-                            Notify('notify_need_weapon', 'error')
+                            fieldNotify('notify_need_weapon', 'error')
                         else
                             attachHarvest(entry)
                         end

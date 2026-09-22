@@ -110,6 +110,8 @@ Config.Hunt = {
     spawnInterval = 3500,
     predatorChance = 0.35,
     harvestAnim = { dict = 'amb@medic@standing@kneel@base', clip = 'base' },
+    -- Field HUD / camp / woods-quiet alerts only while standing in a hunting ground.
+    fieldAlerts = true,
 }
 
 -- Tools that can skin a carcass. hunting_axe plus stock ox melee sold at the lodge.
@@ -681,6 +683,31 @@ Config.DailyTasks = {
         reward = { money = 75 },
     },
 }
+
+function Config.InZone(coords, zone)
+    if not coords or not zone then return false end
+    local dx = coords.x - zone.coords.x
+    local dy = coords.y - zone.coords.y
+    local limit = zone.radiusSq or ((zone.radius or 0) * (zone.radius or 0))
+    return (dx * dx + dy * dy) <= limit
+end
+
+function Config.ZoneAt(coords)
+    if not coords then return nil end
+    for i = 1, #Config.Zones do
+        if Config.InZone(coords, Config.Zones[i]) then
+            return Config.Zones[i]
+        end
+    end
+end
+
+-- Hunt-field ox_lib / HUD alerts. Shop and /hunt status stay available anywhere.
+function Config.ShowFieldAlert(inZone)
+    if Config.Hunt.fieldAlerts == false then
+        return false
+    end
+    return inZone == true
+end
 
 function Config.AnimalInZone(animal, zone)
     if not animal or not zone then return false end

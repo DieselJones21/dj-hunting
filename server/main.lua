@@ -35,16 +35,7 @@ local function isNearShop(src, shopId)
 end
 
 local function getZoneAt(src)
-    local coords = playerCoords(src)
-    if not coords then return nil end
-    for i = 1, #Config.Zones do
-        local zone = Config.Zones[i]
-        local dx = coords.x - zone.coords.x
-        local dy = coords.y - zone.coords.y
-        if (dx * dx + dy * dy) <= zone.radiusSq then
-            return zone
-        end
-    end
+    return Config.ZoneAt(playerCoords(src))
 end
 
 local function hasLicenseItem(src)

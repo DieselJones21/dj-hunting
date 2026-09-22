@@ -134,4 +134,49 @@ for (const file of webImages) {
 
 require('child_process').execFileSync(process.execPath, ['--check', path.join(root, 'html/app.js')]);
 
+function inZone(coords, zone) {
+  const dx = coords.x - zone.x;
+  const dy = coords.y - zone.y;
+  return (dx * dx + dy * dy) <= zone.radius * zone.radius;
+}
+
+function showFieldAlert(inside, fieldAlerts = true) {
+  if (fieldAlerts === false) return false;
+  return inside === true;
+}
+
+const paleto = { x: -580.0, y: 5800.0, radius: 380.0 };
+const chiliadPeak = { x: 501.0, y: 5604.0, radius: 180.0 };
+assert.ok(inZone({ x: -580, y: 5800 }, paleto), 'center of Paleto is in-zone');
+assert.ok(inZone({ x: -400, y: 5800 }, paleto), 'inside Paleto radius');
+assert.ok(!inZone({ x: 0, y: 0 }, paleto), 'Legion Square is not a hunting ground');
+assert.ok(!inZone({ x: -580, y: 6400 }, paleto), 'north of Paleto is outside');
+assert.ok(inZone({ x: 501, y: 5604 }, chiliadPeak));
+assert.ok(!inZone({ x: 501, y: 5900 }, chiliadPeak));
+assert.strictEqual(showFieldAlert(false), false);
+assert.strictEqual(showFieldAlert(true), true);
+assert.strictEqual(showFieldAlert(true, false), false);
+assert.strictEqual(showFieldAlert(false, true), false);
+
+const hunting = fs.readFileSync(path.join(root, 'client/hunting.lua'), 'utf8');
+const client = fs.readFileSync(path.join(root, 'client/main.lua'), 'utf8');
+const server = fs.readFileSync(path.join(root, 'server/main.lua'), 'utf8');
+assert.match(config, /fieldAlerts/);
+assert.match(config, /function Config\.ShowFieldAlert/);
+assert.match(config, /function Config\.ZoneAt/);
+assert.match(hunting, /fieldNotify/);
+assert.match(hunting, /HideHuntHud/);
+assert.match(hunting, /Config\.ShowFieldAlert/);
+assert.match(hunting, /visible = CurrentZone ~= nil|not inHuntZone\(\)/);
+assert.match(client, /HideHuntHud/);
+assert.match(client, /Config\.ShowFieldAlert\(true\)/);
+assert.match(server, /Config\.ZoneAt/);
+assert.match(hunting, /fieldNotify\('notify_camped'/);
+
+const animalsBlock = config.match(/Config\.Animals = \{[\s\S]*?\n\}/) || [];
+assert.ok(config.includes('a_c_rabbit_01') && config.includes('a_c_panther'));
+assert.match(equipment, /WEAPON_PUMPSHOTGUN/);
+assert.match(equipment, /WEAPON_MUSKET/);
+assert.doesNotMatch(equipment, /category = 'smgs'/);
+
 console.log('dj-hunting tests passed');

@@ -284,31 +284,35 @@ local function setupZones()
     CreateThread(function()
         while true do
             local coords = GetEntityCoords(cache.ped)
-            local found, nearestSq
+            local found = Config.ZoneAt(coords)
+            local nearestSq
 
-            for i = 1, zoneCount do
-                local zone = zones[i]
-                local dx = coords.x - zone.coords.x
-                local dy = coords.y - zone.coords.y
-                local distSq = dx * dx + dy * dy
-                if distSq <= zone.radiusSq then
-                    found = zone
-                    break
-                end
-                if not nearestSq or distSq < nearestSq then
-                    nearestSq = distSq
+            if not found then
+                for i = 1, zoneCount do
+                    local zone = zones[i]
+                    local dx = coords.x - zone.coords.x
+                    local dy = coords.y - zone.coords.y
+                    local distSq = dx * dx + dy * dy
+                    if not nearestSq or distSq < nearestSq then
+                        nearestSq = distSq
+                    end
                 end
             end
 
             if found then
                 if not CurrentZone or CurrentZone.id ~= found.id then
                     CurrentZone = found
-                    notify('zone_enter', 'inform', found.name, found.hint or found.type)
+                    if Config.ShowFieldAlert(true) then
+                        notify('zone_enter', 'inform', found.name, found.hint or found.type)
+                    end
                 end
                 Wait(Config.ZoneCheck.inside)
             else
                 if CurrentZone then
                     CurrentZone = nil
+                    if HideHuntHud then
+                        HideHuntHud()
+                    end
                 end
                 local wait = Config.ZoneCheck.far
                 if nearestSq and nearestSq < Config.ZoneCheck.nearbySq then
