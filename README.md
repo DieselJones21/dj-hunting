@@ -100,4 +100,5 @@ Outfitters: Rebel Ranger Lodge, Grapeseed Outfitters, Senora Trading Post, Chili
 Open `html/index.html` in a browser (outside FiveM). Query flags:
 
 - `?view=shop` `sell` `license` `field` `tasks` `board`
+- `?tab=pistols` `smgs` `shotguns` `rifles` `snipers` `ammo` `tools`
 - `?licensed=0` to see the locked store

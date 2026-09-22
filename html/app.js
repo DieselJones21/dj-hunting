@@ -955,6 +955,7 @@ if (!inFiveM) {
   document.body.classList.add('preview');
   const params = new URLSearchParams(location.search);
   const view = params.get('view') || 'shop';
+  const tab = params.get('tab');
   const licensed = params.get('licensed') !== '0';
   const demo = {
     view,
@@ -971,6 +972,10 @@ if (!inFiveM) {
     demo.hunter.xp = 0;
   }
   openUI(demo);
+  if (tab && (CATEGORIES.some((c) => c.id === tab) || SELL_TABS.some((c) => c.id === tab) || FIELD_TABS.some((c) => c.id === tab) || BOARD_TABS.some((c) => c.id === tab))) {
+    state.tab = tab;
+    render();
+  }
   if (params.get('hud') !== '0') {
     applyHud({
       visible: true,
