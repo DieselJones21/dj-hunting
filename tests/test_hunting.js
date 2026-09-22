@@ -50,6 +50,7 @@ assert.ok(animals.deer.level > animals.rabbit.level);
 const required = [
   'fxmanifest.lua',
   'config.lua',
+  'data/equipment.lua',
   'README.md',
   'html/index.html',
   'html/style.css',
@@ -71,6 +72,8 @@ const html = fs.readFileSync(path.join(root, 'html/index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'html/style.css'), 'utf8');
 const js = fs.readFileSync(path.join(root, 'html/app.js'), 'utf8');
 const config = fs.readFileSync(path.join(root, 'config.lua'), 'utf8');
+const equipment = fs.readFileSync(path.join(root, 'data/equipment.lua'), 'utf8');
+const items = fs.readFileSync(path.join(root, 'install/ox_inventory_items.lua'), 'utf8');
 const locale = fs.readFileSync(path.join(root, 'locales/en.json'), 'utf8');
 
 assert.match(html, /Rebel Hunting/);
@@ -78,16 +81,50 @@ assert.match(html, /DJ FIVEM SCRIPTS/);
 assert.match(css, /--accent: #ff2a2a/);
 assert.match(js, /buyLicense/);
 assert.match(js, /SHOP_NAV/);
-assert.match(config, /WEAPON_MUSKET/);
+assert.match(js, /WEAPON_PISTOL/);
+assert.match(js, /inv-icon/);
+assert.match(js, /images\/\$\{give\}\.png/);
 assert.match(config, /hunting_license/);
 assert.match(config, /searchCooldown/);
 assert.match(config, /walkDistance/);
 assert.match(config, /a_c_panther/);
 assert.match(config, /a_c_mtlion/);
 assert.match(config, /a_c_deer/);
+assert.match(config, /ammo-sniper/);
+assert.match(equipment, /WEAPON_MUSKET/);
+assert.match(equipment, /WEAPON_PISTOL/);
+assert.match(equipment, /WEAPON_ASSAULTRIFLE/);
+assert.match(equipment, /WEAPON_HEAVYSNIPER/);
+assert.match(equipment, /ammo-9/);
+assert.match(equipment, /ox_inventory/);
+assert.match(items, /client = \{ image = 'hunting_license\.png' \}/);
 assert.match(locale, /notify_need_license/);
 assert.match(locale, /notify_need_axe/);
 assert.match(locale, /notify_camped/);
+
+const webImages = [
+  'html/images/WEAPON_PISTOL.png',
+  'html/images/WEAPON_MUSKET.png',
+  'html/images/WEAPON_ASSAULTRIFLE.png',
+  'html/images/WEAPON_HEAVYSNIPER.png',
+  'html/images/ammo-9.png',
+  'html/images/ammo-sniper.png',
+  'html/images/hunting_license.png',
+  'html/images/hunting_axe.png',
+  'html/images/animal_meat.png',
+  'html/images/animal_leather.png',
+  'html/images/animal_bones.png',
+  'html/images/trophy_antler.png',
+  'html/images/WEAPON_TACTICALRIFLE.png',
+  'html/images/WEAPON_BATTLERIFLE.png',
+  'install/inventory_images/hunting_license.png',
+  'install/inventory_images/hunting_axe.png',
+];
+
+for (const file of webImages) {
+  assert.ok(fs.existsSync(path.join(root, file)), `missing ${file}`);
+  assert.ok(fs.statSync(path.join(root, file)).size > 500, `empty ${file}`);
+}
 
 require('child_process').execFileSync(process.execPath, ['--check', path.join(root, 'html/app.js')]);
 

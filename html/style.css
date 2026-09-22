@@ -335,26 +335,30 @@ input:focus-visible {
 }
 
 .icon {
-  width: 54px;
-  height: 54px;
+  width: 64px;
+  height: 64px;
   border-radius: 16px;
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.28);
   color: #ececf2;
   box-shadow: none;
 }
 
 .icon svg { width: 26px; height: 26px; }
 
-.icon img {
+.icon img,
+.icon .inv-icon {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 12px;
   pointer-events: none;
+  padding: 4px;
 }
+
+.icon-fallback[hidden] { display: none !important; }
 
 .badge {
   font-size: 10px;
@@ -605,6 +609,22 @@ input:focus-visible {
 
 .license-hero h3 { font-size: 22px; font-style: normal; }
 .license-hero p { color: var(--muted); margin-top: 8px; max-width: 520px; }
+
+.license-art {
+  width: 88px;
+  height: 88px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.28);
+  flex-shrink: 0;
+}
+
+.license-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
 
 .hud {
   position: fixed;

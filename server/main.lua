@@ -78,9 +78,10 @@ local function catalog()
         local name = Config.ShopCatalogOrder[i]
         local data = Config.Equipment[name]
         if data then
+            local give = inventoryItem(data)
             items[#items + 1] = {
                 item = name,
-                give = inventoryItem(data),
+                give = give,
                 label = data.label,
                 description = data.description,
                 category = data.category,
@@ -89,6 +90,7 @@ local function catalog()
                 weapon = data.weapon,
                 ammo = data.ammo,
                 amount = data.amount or 1,
+                image = data.image or Config.ItemImage(give),
             }
         end
     end
@@ -152,6 +154,7 @@ local function sellStock(src)
                 rarity = name:find('trophy', 1, true) and 'legendary' or 'common',
                 price = data.sell,
                 count = count,
+                image = Config.ItemImage(name),
             }
         end
     end
@@ -182,6 +185,7 @@ local function shopPayload(src)
             description = Config.License.description,
             price = Stats.HasLicenseFlag(src) and Config.License.replacePrice or Config.License.price,
             owned = licensed,
+            image = Config.ItemImage(Config.License.item),
         },
         tasks = extra.tasks,
         board = extra.board,
@@ -539,7 +543,7 @@ lib.addCommand('huntingkit', {
     Stats.GrantLicense(source)
     exports.ox_inventory:AddItem(source, Config.License.item, 1)
     exports.ox_inventory:AddItem(source, 'hunting_axe', 1)
-    local starter = Config.Equipment.hunting_rifle_starter
+    local starter = Config.Equipment.WEAPON_MUSKET
     if starter then
         exports.ox_inventory:AddItem(source, inventoryItem(starter), 1)
         if starter.ammo then

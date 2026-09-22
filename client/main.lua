@@ -53,15 +53,19 @@ local function catalogFromConfig()
         local name = Config.ShopCatalogOrder[i]
         local data = Config.Equipment[name]
         if data then
+            local give = data.item or data.weapon or name
             items[#items + 1] = {
                 item = name,
+                give = give,
                 label = data.label,
                 description = data.description,
                 category = data.category,
                 price = data.price,
                 level = data.level or 1,
                 weapon = data.weapon,
+                ammo = data.ammo,
                 amount = data.amount or 1,
+                image = data.image or Config.ItemImage(give),
             }
         end
     end

@@ -10,6 +10,7 @@ version '1.0.0'
 shared_scripts {
     '@ox_lib/init.lua',
     'config.lua',
+    'data/equipment.lua',
 }
 
 client_scripts {
@@ -30,6 +31,7 @@ files {
     'html/style.css',
     'html/app.js',
     'html/brand/*.png',
+    'html/images/*.png',
     'locales/*.json',
 }
 

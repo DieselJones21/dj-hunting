@@ -39,17 +39,36 @@ function emptyState(title, copy) {
   return `<div class="empty">${BRAND_LOGO}<strong>${escapeHtml(title)}</strong><p>${escapeHtml(copy)}</p></div>`;
 }
 
-function iconFor(item) {
-  if (item.category === 'guns') return ICONS.gun;
-  if (item.category === 'tools') return ICONS.axe;
-  if (item.category === 'ammo') return ICONS.shop;
+function inventoryName(item) {
+  return item.give || item.weapon || item.item || '';
+}
+
+function fallbackIcon(item) {
+  const category = item.category;
+  if (category === 'tools') return ICONS.axe;
+  if (category === 'ammo') return ICONS.shop;
+  if (item.weapon || ['pistols', 'smgs', 'shotguns', 'rifles', 'snipers', 'mg', 'guns'].includes(category)) {
+    return ICONS.gun;
+  }
   if (item.rarity === 'legendary' || item.aggressive) return ICONS.field;
   return ICONS.field;
 }
 
+function iconFor(item) {
+  const name = inventoryName(item);
+  const src = item.image || (name ? `images/${name}.png` : '');
+  const fallback = fallbackIcon(item);
+  if (!src) return fallback;
+  return `<img class="inv-icon" src="${escapeHtml(src)}" alt="" decoding="async" draggable="false" onerror="this.style.display='none';const s=this.nextElementSibling;if(s)s.hidden=false"/><span class="icon-fallback" hidden>${fallback}</span>`;
+}
+
 const CATEGORIES = [
   { id: 'all', label: 'All gear' },
-  { id: 'guns', label: 'Guns' },
+  { id: 'pistols', label: 'Pistols' },
+  { id: 'smgs', label: 'SMGs' },
+  { id: 'shotguns', label: 'Shotguns' },
+  { id: 'rifles', label: 'Rifles' },
+  { id: 'snipers', label: 'Snipers' },
   { id: 'ammo', label: 'Ammo' },
   { id: 'tools', label: 'Tools' },
 ];
@@ -80,26 +99,112 @@ const SHOP_NAV = [
   { id: 'board', label: 'Board', icon: 'board' },
 ];
 
+function gear(item, label, category, price, level, description, extra = {}) {
+  const give = extra.give || extra.weapon || item;
+  return {
+    item,
+    give,
+    label,
+    description,
+    category,
+    price,
+    level,
+    weapon: extra.weapon,
+    ammo: extra.ammo,
+    amount: extra.amount || 1,
+    image: `images/${give}.png`,
+  };
+}
+
 const DEMO = {
   ok: true,
   player: { name: 'Diesel Jones', cash: 8420 },
   catalog: [
-    { item: 'hunting_axe', label: 'Skinning Axe', description: 'Required to harvest leather, meat, and bone.', category: 'tools', price: 220, level: 1 },
-    { item: 'hunting_rifle_starter', label: 'Trail Musket', description: 'Old Rebel trail gun. Legal on rabbits and farm stock.', category: 'guns', price: 850, level: 1, weapon: 'WEAPON_MUSKET' },
-    { item: 'hunting_rifle_field', label: 'Chaparral 12ga', description: 'Brush gun for pigs, boar, and coyote.', category: 'guns', price: 1850, level: 3, weapon: 'WEAPON_PUMPSHOTGUN' },
-    { item: 'hunting_rifle_marksman', label: 'Senora Marksman', description: 'Opens deer and canyon game.', category: 'guns', price: 4200, level: 5, weapon: 'WEAPON_MARKSMANRIFLE' },
-    { item: 'hunting_rifle_ridge', label: 'Chiliad Ridge Rifle', description: 'Long glass for mountain lion country.', category: 'guns', price: 7800, level: 7, weapon: 'WEAPON_SNIPERRIFLE' },
-    { item: 'hunting_rifle_apex', label: 'Rebel Apex', description: 'Top-end rifle. Required for panther country.', category: 'guns', price: 14500, level: 9, weapon: 'WEAPON_HEAVYSNIPER' },
-    { item: 'ammo_musket', label: 'Musket Powder Loads', description: 'Paper loads for the Trail Musket.', category: 'ammo', price: 8, level: 1, amount: 10 },
-    { item: 'ammo_shotgun', label: 'Buckshot', description: '12 gauge for the Chaparral.', category: 'ammo', price: 12, level: 3, amount: 12 },
-    { item: 'ammo_rifle', label: 'Rifle Rounds', description: 'Marksman rifle ammunition.', category: 'ammo', price: 16, level: 5, amount: 20 },
-    { item: 'ammo_sniper', label: 'Match Grade Slugs', description: 'Long-range loads for ridge and apex rifles.', category: 'ammo', price: 28, level: 7, amount: 10 },
+    gear('hunting_axe', 'Skinning Axe', 'tools', 220, 1, 'Rebel camp axe. Required to harvest leather, meat, and bone.'),
+    gear('WEAPON_KNIFE', 'Knife', 'tools', 80, 1, 'Belt knife. Legal harvest tool on small game.', { weapon: 'WEAPON_KNIFE' }),
+    gear('WEAPON_HATCHET', 'Hatchet', 'tools', 180, 1, 'Trail hatchet. Skins a carcass the same as the camp axe.', { weapon: 'WEAPON_HATCHET' }),
+    gear('WEAPON_MACHETE', 'Machete', 'tools', 160, 3, 'Brush blade. Works as a harvest tool in chaparral.', { weapon: 'WEAPON_MACHETE' }),
+    gear('WEAPON_STONE_HATCHET', 'Stone Hatchet', 'tools', 140, 7, 'Old stone head. Still legal for a Rebel harvest.', { weapon: 'WEAPON_STONE_HATCHET' }),
+    gear('WEAPON_BATTLEAXE', 'Battle Axe', 'tools', 280, 7, 'Heavy camp axe. Fastest legal skinning tool on the board.', { weapon: 'WEAPON_BATTLEAXE' }),
+    gear('WEAPON_SNSPISTOL', 'SNS Pistol', 'pistols', 480, 1, 'Pocket .45. Quiet starter sidearm for farm country.', { weapon: 'WEAPON_SNSPISTOL', ammo: 'ammo-45' }),
+    gear('WEAPON_PISTOL', 'Pistol', 'pistols', 650, 1, 'Standard 9mm. Legal on rabbits, birds, and farm stock.', { weapon: 'WEAPON_PISTOL', ammo: 'ammo-9' }),
+    gear('WEAPON_COMBATPISTOL', 'Combat Pistol', 'pistols', 780, 1, 'Compact 9mm. Cleaner follow-up shots in brush.', { weapon: 'WEAPON_COMBATPISTOL', ammo: 'ammo-9' }),
+    gear('WEAPON_VINTAGEPISTOL', 'Vintage Pistol', 'pistols', 720, 1, 'Old Rebel 9mm. Slow, honest, still legal.', { weapon: 'WEAPON_VINTAGEPISTOL', ammo: 'ammo-9' }),
+    gear('WEAPON_HEAVYPISTOL', 'Heavy Pistol', 'pistols', 1100, 2, '.45 sidearm with more punch on pigs and coyote.', { weapon: 'WEAPON_HEAVYPISTOL', ammo: 'ammo-45' }),
+    gear('WEAPON_CERAMICPISTOL', 'Ceramic Pistol', 'pistols', 980, 2, 'Light 9mm. Easy to carry on long walks.', { weapon: 'WEAPON_CERAMICPISTOL', ammo: 'ammo-9' }),
+    gear('WEAPON_DOUBLEACTION', 'Double Action Revolver', 'pistols', 1250, 2, '.38 wheelgun. Classic trail pistol.', { weapon: 'WEAPON_DOUBLEACTION', ammo: 'ammo-38' }),
+    gear('WEAPON_PISTOLXM3', 'WM 29 Pistol', 'pistols', 1350, 2, 'Modern 9mm. Tight groups on small game.', { weapon: 'WEAPON_PISTOLXM3', ammo: 'ammo-9' }),
+    gear('WEAPON_APPISTOL', 'AP Pistol', 'pistols', 2100, 3, 'Full-auto 9mm. Burns ammo. Legal if you stay licensed.', { weapon: 'WEAPON_APPISTOL', ammo: 'ammo-9' }),
+    gear('WEAPON_PISTOL50', 'Pistol .50', 'pistols', 2400, 3, 'Heavy desert pistol. Stops a boar at close range.', { weapon: 'WEAPON_PISTOL50', ammo: 'ammo-50' }),
+    gear('WEAPON_REVOLVER', 'Revolver', 'pistols', 1850, 3, '.44 Magnum. Senora and canyon work.', { weapon: 'WEAPON_REVOLVER', ammo: 'ammo-44' }),
+    gear('WEAPON_MARKSMANPISTOL', 'Marksman Pistol', 'pistols', 1600, 3, 'Single-shot .22. Precision small-game pistol.', { weapon: 'WEAPON_MARKSMANPISTOL', ammo: 'ammo-22' }),
+    gear('WEAPON_PISTOL_MK2', 'Pistol MK2', 'pistols', 2800, 5, 'Refined 9mm. Better glass, same legal take.', { weapon: 'WEAPON_PISTOL_MK2', ammo: 'ammo-9' }),
+    gear('WEAPON_SNSPISTOL_MK2', 'SNS Pistol MK2', 'pistols', 2200, 5, 'Tuned pocket .45. Light for ridge walks.', { weapon: 'WEAPON_SNSPISTOL_MK2', ammo: 'ammo-45' }),
+    gear('WEAPON_GADGETPISTOL', 'Perico Pistol', 'pistols', 3200, 5, 'Heavy 9mm single-stack. Hard-hitting close work.', { weapon: 'WEAPON_GADGETPISTOL', ammo: 'ammo-9' }),
+    gear('WEAPON_NAVYREVOLVER', 'Navy Revolver', 'pistols', 2600, 5, 'Antique .44. Slow cylinder, serious punch.', { weapon: 'WEAPON_NAVYREVOLVER', ammo: 'ammo-44' }),
+    gear('WEAPON_REVOLVER_MK2', 'Revolver MK2', 'pistols', 3800, 10, 'Apex wheelgun. Summit kit if you hunt close.', { weapon: 'WEAPON_REVOLVER_MK2', ammo: 'ammo-44' }),
+    gear('WEAPON_MINISMG', 'Mini SMG', 'smgs', 1650, 2, 'Compact 9mm. Fast follow-ups in timber.', { weapon: 'WEAPON_MINISMG', ammo: 'ammo-9' }),
+    gear('WEAPON_MACHINEPISTOL', 'Machine Pistol', 'smgs', 1450, 2, 'Spray 9mm. Keep it legal and walk after the take.', { weapon: 'WEAPON_MACHINEPISTOL', ammo: 'ammo-9' }),
+    gear('WEAPON_MICROSMG', 'Micro SMG', 'smgs', 2100, 3, '.45 compact. Brush country sidearm.', { weapon: 'WEAPON_MICROSMG', ammo: 'ammo-45' }),
+    gear('WEAPON_SMG', 'SMG', 'smgs', 2400, 3, 'Service 9mm. Mid-woods workhorse.', { weapon: 'WEAPON_SMG', ammo: 'ammo-9' }),
+    gear('WEAPON_TECPISTOL', 'Tactical SMG', 'smgs', 2650, 4, 'Modern 9mm PDW. Tight groups on moving game.', { weapon: 'WEAPON_TECPISTOL', ammo: 'ammo-9' }),
+    gear('WEAPON_COMBATPDW', 'Combat PDW', 'smgs', 2800, 4, 'Carbine-length 9mm. Good in Paleto timber.', { weapon: 'WEAPON_COMBATPDW', ammo: 'ammo-9' }),
+    gear('WEAPON_ASSAULTSMG', 'Assault SMG', 'smgs', 3100, 4, 'Rifle-caliber SMG. Opens deer country early.', { weapon: 'WEAPON_ASSAULTSMG', ammo: 'ammo-rifle' }),
+    gear('WEAPON_SMG_MK2', 'SMG MK2', 'smgs', 4200, 7, 'Tuned 9mm. Ridge walks and cat country.', { weapon: 'WEAPON_SMG_MK2', ammo: 'ammo-9' }),
+    gear('WEAPON_MUSKET', 'Musket', 'shotguns', 850, 1, 'Old Rebel trail gun. Legal on rabbits, birds, and farm stock.', { weapon: 'WEAPON_MUSKET', ammo: 'ammo-musket' }),
+    gear('WEAPON_SAWNOFFSHOTGUN', 'Sawn Off Shotgun', 'shotguns', 1400, 3, 'Short 12ga. Close brush and hogs.', { weapon: 'WEAPON_SAWNOFFSHOTGUN', ammo: 'ammo-shotgun' }),
+    gear('WEAPON_DBSHOTGUN', 'Double Barrel Shotgun', 'shotguns', 1550, 3, 'Two barrels. Honest farm and chaparral gun.', { weapon: 'WEAPON_DBSHOTGUN', ammo: 'ammo-shotgun' }),
+    gear('WEAPON_PUMPSHOTGUN', 'Pump Shotgun', 'shotguns', 1850, 3, 'Chaparral 12ga. Pigs, boar, and coyote.', { weapon: 'WEAPON_PUMPSHOTGUN', ammo: 'ammo-shotgun' }),
+    gear('WEAPON_BULLPUPSHOTGUN', 'Bullpup Shotgun', 'shotguns', 2300, 4, 'Compact 12ga. Tight timber shots.', { weapon: 'WEAPON_BULLPUPSHOTGUN', ammo: 'ammo-shotgun' }),
+    gear('WEAPON_COMBATSHOTGUN', 'Combat Shotgun', 'shotguns', 2600, 4, 'Semi 12ga. Fast follow-ups on charging boar.', { weapon: 'WEAPON_COMBATSHOTGUN', ammo: 'ammo-shotgun' }),
+    gear('WEAPON_AUTOSHOTGUN', 'Sweeper Shotgun', 'shotguns', 2750, 4, 'Auto 12ga. Burns shells. Walk after the harvest.', { weapon: 'WEAPON_AUTOSHOTGUN', ammo: 'ammo-shotgun' }),
+    gear('WEAPON_HEAVYSHOTGUN', 'Heavy Shotgun', 'shotguns', 3200, 5, 'Box-fed 12ga. Thick hide country.', { weapon: 'WEAPON_HEAVYSHOTGUN', ammo: 'ammo-shotgun' }),
+    gear('WEAPON_ASSAULTSHOTGUN', 'Assault Shotgun', 'shotguns', 3400, 5, 'Full-auto 12ga. Legal only with a Rebel license.', { weapon: 'WEAPON_ASSAULTSHOTGUN', ammo: 'ammo-shotgun' }),
+    gear('WEAPON_PUMPSHOTGUN_MK2', 'Pump Shotgun MK2', 'shotguns', 3900, 6, 'Tuned pump. Deer and canyon work.', { weapon: 'WEAPON_PUMPSHOTGUN_MK2', ammo: 'ammo-shotgun' }),
+    gear('WEAPON_COMPACTRIFLE', 'Compact Rifle', 'rifles', 2800, 4, 'Short 7.62. First real woods rifle.', { weapon: 'WEAPON_COMPACTRIFLE', ammo: 'ammo-rifle2' }),
+    gear('WEAPON_ASSAULTRIFLE', 'Assault Rifle', 'rifles', 3600, 5, '7.62 service rifle. Mid-country workhorse.', { weapon: 'WEAPON_ASSAULTRIFLE', ammo: 'ammo-rifle2' }),
+    gear('WEAPON_CARBINERIFLE', 'Carbine Rifle', 'rifles', 3800, 5, '5.56 carbine. Senora and canyon glass.', { weapon: 'WEAPON_CARBINERIFLE', ammo: 'ammo-rifle' }),
+    gear('WEAPON_ADVANCEDRIFLE', 'Advanced Rifle', 'rifles', 4100, 5, 'Bullpup 5.56. Fast handling in timber.', { weapon: 'WEAPON_ADVANCEDRIFLE', ammo: 'ammo-rifle' }),
+    gear('WEAPON_GUSENBERG', 'Gusenberg', 'rifles', 4800, 5, '.45 drum. Old-school brush sweeper.', { weapon: 'WEAPON_GUSENBERG', ammo: 'ammo-45' }),
+    gear('WEAPON_SPECIALCARBINE', 'Special Carbine', 'rifles', 4300, 6, '5.56 all-rounder. Opens deer country.', { weapon: 'WEAPON_SPECIALCARBINE', ammo: 'ammo-rifle' }),
+    gear('WEAPON_BULLPUPRIFLE', 'Bullpup Rifle', 'rifles', 4000, 6, 'Compact 5.56. Tight canyon shots.', { weapon: 'WEAPON_BULLPUPRIFLE', ammo: 'ammo-rifle' }),
+    gear('WEAPON_MILITARYRIFLE', 'Military Rifle', 'rifles', 4500, 6, 'Service 5.56. Steady on a ridge.', { weapon: 'WEAPON_MILITARYRIFLE', ammo: 'ammo-rifle' }),
+    gear('WEAPON_TACTICALRIFLE', 'Tactical Rifle', 'rifles', 4800, 7, 'Long 5.56. Glass a line, do not camp it.', { weapon: 'WEAPON_TACTICALRIFLE', ammo: 'ammo-rifle' }),
+    gear('WEAPON_BATTLERIFLE', 'Battle Rifle', 'rifles', 5200, 7, 'Heavy 7.62. Mountain lion country.', { weapon: 'WEAPON_BATTLERIFLE', ammo: 'ammo-rifle2' }),
+    gear('WEAPON_HEAVYRIFLE', 'Heavy Rifle', 'rifles', 5400, 7, 'Hard-hitting 5.56. Cat country rifle.', { weapon: 'WEAPON_HEAVYRIFLE', ammo: 'ammo-rifle' }),
+    gear('WEAPON_MG', 'Machine Gun', 'rifles', 7200, 8, 'Sustained 7.62. Legal only with papers. Walk after.', { weapon: 'WEAPON_MG', ammo: 'ammo-rifle2' }),
+    gear('WEAPON_ASSAULTRIFLE_MK2', 'Assault Rifle MK2', 'rifles', 6200, 8, 'Tuned 7.62. High-country workhorse.', { weapon: 'WEAPON_ASSAULTRIFLE_MK2', ammo: 'ammo-rifle2' }),
+    gear('WEAPON_CARBINERIFLE_MK2', 'Carbine Rifle MK2', 'rifles', 6400, 8, 'Tuned 5.56. Precision ridge rifle.', { weapon: 'WEAPON_CARBINERIFLE_MK2', ammo: 'ammo-rifle' }),
+    gear('WEAPON_SPECIALCARBINE_MK2', 'Special Carbine MK2', 'rifles', 6600, 8, 'Apex 5.56 carbine. Summit kit.', { weapon: 'WEAPON_SPECIALCARBINE_MK2', ammo: 'ammo-rifle' }),
+    gear('WEAPON_BULLPUPRIFLE_MK2', 'Bullpup Rifle MK2', 'rifles', 6800, 9, 'Tuned bullpup. Tight timber at rank nine.', { weapon: 'WEAPON_BULLPUPRIFLE_MK2', ammo: 'ammo-rifle' }),
+    gear('WEAPON_COMBATMG', 'Combat MG', 'rifles', 8800, 9, 'Belt 5.56. Heavy and loud. Still a legal hunting gun.', { weapon: 'WEAPON_COMBATMG', ammo: 'ammo-rifle' }),
+    gear('WEAPON_COMBATMG_MK2', 'Combat MG MK2', 'rifles', 11000, 10, 'Apex machine gun. Panther country only if you stay moving.', { weapon: 'WEAPON_COMBATMG_MK2', ammo: 'ammo-rifle2' }),
+    gear('WEAPON_MARKSMANRIFLE', 'Marksman Rifle', 'snipers', 4200, 6, 'Semi 7.62. Opens deer and canyon game.', { weapon: 'WEAPON_MARKSMANRIFLE', ammo: 'ammo-sniper' }),
+    gear('WEAPON_PRECISIONRIFLE', 'Precision Rifle', 'snipers', 7200, 7, 'Bolt 7.62. One clean shot, then walk.', { weapon: 'WEAPON_PRECISIONRIFLE', ammo: 'ammo-sniper' }),
+    gear('WEAPON_SNIPERRIFLE', 'Sniper Rifle', 'snipers', 7800, 7, 'Long glass for mountain lion country.', { weapon: 'WEAPON_SNIPERRIFLE', ammo: 'ammo-sniper' }),
+    gear('WEAPON_MARKSMANRIFLE_MK2', 'Marksman Rifle MK2', 'snipers', 9200, 8, 'Tuned marksman. Cat country glass.', { weapon: 'WEAPON_MARKSMANRIFLE_MK2', ammo: 'ammo-sniper' }),
+    gear('WEAPON_HEAVYSNIPER', 'Heavy Sniper', 'snipers', 14500, 9, '.50 BMG. Top-end hunting rifle for panther country.', { weapon: 'WEAPON_HEAVYSNIPER', ammo: 'ammo-heavysniper' }),
+    gear('WEAPON_HEAVYSNIPER_MK2', 'Heavy Sniper MK2', 'snipers', 18500, 10, 'Apex .50. Highest Rebel glass on the mountain.', { weapon: 'WEAPON_HEAVYSNIPER_MK2', ammo: 'ammo-heavysniper' }),
+    gear('ammo-9', '9mm', 'ammo', 12, 1, 'Pistol and SMG ammunition.', { amount: 24 }),
+    gear('ammo-45', '.45 ACP', 'ammo', 13, 1, 'SNS, heavy pistol, Micro SMG, Gusenberg.', { amount: 24 }),
+    gear('ammo-musket', '.50 Ball', 'ammo', 8, 1, 'Paper loads for the Musket.', { amount: 10 }),
+    gear('ammo-38', '.38 LC', 'ammo', 14, 2, 'Double-action revolver loads.', { amount: 12 }),
+    gear('ammo-22', '.22 Long Rifle', 'ammo', 10, 3, 'Marksman pistol ammunition.', { amount: 16 }),
+    gear('ammo-44', '.44 Magnum', 'ammo', 16, 3, 'Revolver and Navy loads.', { amount: 12 }),
+    gear('ammo-50', '.50 AE', 'ammo', 22, 3, 'Pistol .50 ammunition.', { amount: 12 }),
+    gear('ammo-shotgun', '12 Gauge', 'ammo', 14, 3, 'Buckshot for every lodge shotgun.', { amount: 16 }),
+    gear('ammo-rifle', '5.56x45', 'ammo', 16, 4, 'Carbine and 5.56 rifle ammunition.', { amount: 30 }),
+    gear('ammo-rifle2', '7.62x39', 'ammo', 18, 4, 'Assault rifle and battle rifle ammunition.', { amount: 30 }),
+    gear('ammo-sniper', '7.62x51', 'ammo', 28, 6, 'Marksman and sniper ammunition.', { amount: 12 }),
+    gear('ammo-heavysniper', '.50 BMG', 'ammo', 35, 9, 'Heavy sniper ammunition.', { amount: 8 }),
   ],
   goods: [
-    { item: 'animal_meat', label: 'Game Meat', description: 'Cleaned cuts.', rarity: 'common', price: 22, count: 8 },
-    { item: 'animal_leather', label: 'Hide', description: 'Salted hide.', rarity: 'common', price: 34, count: 5 },
-    { item: 'animal_bones', label: 'Bones', description: 'Clean bone.', rarity: 'common', price: 14, count: 6 },
-    { item: 'trophy_antler', label: 'Trophy Antler', description: 'A heavy rack.', rarity: 'legendary', price: 220, count: 1 },
+    { item: 'animal_meat', label: 'Game Meat', description: 'Cleaned cuts.', rarity: 'common', price: 22, count: 8, image: 'images/animal_meat.png' },
+    { item: 'animal_leather', label: 'Hide', description: 'Salted hide.', rarity: 'common', price: 34, count: 5, image: 'images/animal_leather.png' },
+    { item: 'animal_bones', label: 'Bones', description: 'Clean bone.', rarity: 'common', price: 14, count: 6, image: 'images/animal_bones.png' },
+    { item: 'trophy_antler', label: 'Trophy Antler', description: 'A heavy rack.', rarity: 'legendary', price: 220, count: 1, image: 'images/trophy_antler.png' },
+    { item: 'trophy_fang', label: 'Predator Fang', description: 'Taken from a legal mountain cat.', rarity: 'legendary', price: 310, count: 1, image: 'images/trophy_fang.png' },
+    { item: 'trophy_pelt', label: 'Rebel Pelt', description: 'Apex hide.', rarity: 'legendary', price: 540, count: 1, image: 'images/trophy_pelt.png' },
   ],
   field: [
     { id: 'rabbit', label: 'Rabbit', description: 'Starter game.', level: 1, xp: 18, rarity: 'common', payout: 70 },
@@ -117,12 +222,12 @@ const DEMO = {
     { id: 'mtlion', label: 'Mountain Lion', description: 'It hunts back.', level: 8, xp: 180, rarity: 'legendary', payout: 438 },
     { id: 'panther', label: 'Panther', description: 'Apex of San Andreas.', level: 10, xp: 260, rarity: 'legendary', payout: 840 },
   ],
-  equipment: { hunting_axe: 1, hunting_rifle_starter: 1, ammo_musket: 20 },
+  equipment: { hunting_axe: 1, WEAPON_MUSKET: 1, 'ammo-musket': 20, WEAPON_PISTOL: 1 },
   tasks: [
     { id: 'harvest_any', label: 'Walk the woods', description: 'Harvest 6 animals of any kind today.', count: 6, progress: 3, claimed: false, reward: 220, rewardItems: [] },
     { id: 'harvest_small', label: 'Small game', description: 'Harvest 4 rabbits, hens, or birds.', count: 4, progress: 4, claimed: false, reward: 180, rewardItems: [] },
     { id: 'harvest_deer', label: 'Rack run', description: 'Harvest 2 deer.', count: 2, progress: 0, claimed: false, reward: 350, rewardItems: [] },
-    { id: 'harvest_predator', label: 'Cat country', description: 'Harvest a coyote, mountain lion, or panther.', count: 1, progress: 0, claimed: false, reward: 500, rewardItems: [{ item: 'ammo_sniper', count: 2, label: 'Match Grade Slugs' }] },
+    { id: 'harvest_predator', label: 'Cat country', description: 'Harvest a coyote, mountain lion, or panther.', count: 1, progress: 0, claimed: false, reward: 500, rewardItems: [{ item: 'ammo-sniper', count: 2, label: '7.62x51' }] },
     { id: 'sell_cash', label: 'Lodge payout', description: 'Sell $500 worth of harvest today.', count: 500, progress: 210, claimed: false, reward: 150, rewardItems: [] },
   ],
   board: {
@@ -135,7 +240,7 @@ const DEMO = {
   hunter: { level: 4, xp: 540, toNext: 280, floor: 500, next: 820, max: 10, licensed: true, harvests: 41 },
   licensed: true,
   licensedFlag: true,
-  license: { item: 'hunting_license', label: 'Rebel Hunting License', description: 'Issued by Rebel Ranger Lodge.', price: 450, owned: true },
+  license: { item: 'hunting_license', label: 'Rebel Hunting License', description: 'Issued by Rebel Ranger Lodge.', price: 450, owned: true, image: 'images/hunting_license.png' },
   resetsIn: 14600,
 };
 
@@ -169,7 +274,7 @@ const state = {
   hunter: { level: 1, xp: 0, toNext: 120, max: 10, licensed: false, harvests: 0 },
   licensed: false,
   licensedFlag: false,
-  license: { label: 'Rebel Hunting License', price: 450, owned: false, description: '' },
+  license: { label: 'Rebel Hunting License', price: 450, owned: false, description: '', image: 'images/hunting_license.png' },
   resetsIn: 0,
   brand: { name: 'Rebel Roleplay', role: 'Licensed hunter', initials: 'RR' },
   busy: false,
@@ -369,7 +474,7 @@ function renderStats() {
   const value = state.goods.reduce((a, f) => a + f.price * f.count, 0);
   const done = state.tasks.filter((t) => t.progress >= t.count).length;
   const claimed = state.tasks.filter((t) => t.claimed).length;
-  const guns = state.catalog.filter((i) => i.category === 'guns' && ownedCount(i.item) > 0).length;
+  const guns = state.catalog.filter((i) => i.weapon && ownedCount(i.item) > 0).length;
 
   let cards;
   if (state.view === 'license') {
@@ -446,8 +551,12 @@ function renderLicense() {
   const owned = state.licensed;
   const price = state.license.price || 450;
   const canBuy = !owned && (state.shop.sellsLicense !== false);
+  const licenseImage = state.license.image || 'images/hunting_license.png';
   content.innerHTML = `
     <div class="license-hero">
+      <div class="license-art">
+        <img src="${escapeHtml(licenseImage)}" alt="" decoding="async" draggable="false" />
+      </div>
       <div>
         <h3>${owned ? 'Papers in order' : 'Rebel hunting license'}</h3>
         <p>${escapeHtml(state.license.description || 'Buy this from the Ranger Lodge before you can purchase guns, ammo, or the skinning axe.')}</p>

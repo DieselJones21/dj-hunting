@@ -112,136 +112,18 @@ Config.Hunt = {
     harvestAnim = { dict = 'amb@medic@standing@kneel@base', clip = 'base' },
 }
 
--- Tools that can skin a carcass. hunting_axe is sold at Rebel Outfitters.
-Config.HarvestTools = { 'hunting_axe', 'WEAPON_HATCHET', 'WEAPON_BATTLEAXE' }
-
-----------------------------------------------------------------
--- Store gear
--- Guns: change `weapon` / `item` to the spawn names you run.
--- `item` is the ox_inventory item (usually the same as the weapon spawn).
-----------------------------------------------------------------
-Config.Equipment = {
-    hunting_axe = {
-        label = 'Skinning Axe',
-        description = 'Short camp axe. Required to harvest leather, meat, and bone.',
-        category = 'tools',
-        price = 220,
-        level = 1,
-        weight = 900,
-        item = 'hunting_axe',
-    },
-    hunting_rifle_starter = {
-        label = 'Trail Musket',
-        description = 'Old Rebel trail gun. Legal on rabbits, birds, and farm stock.',
-        category = 'guns',
-        price = 850,
-        level = 1,
-        weapon = 'WEAPON_MUSKET', -- SPAWN NAME — swap this
-        item = 'WEAPON_MUSKET',
-        ammo = 'ammo-musket',
-    },
-    hunting_rifle_field = {
-        label = 'Chaparral 12ga',
-        description = 'Brush gun for pigs, boar, and coyote.',
-        category = 'guns',
-        price = 1850,
-        level = 3,
-        weapon = 'WEAPON_PUMPSHOTGUN', -- SPAWN NAME — swap this
-        item = 'WEAPON_PUMPSHOTGUN',
-        ammo = 'ammo-shotgun',
-    },
-    hunting_rifle_marksman = {
-        label = 'Senora Marksman',
-        description = 'Mid-range rifle. Opens deer and canyon game.',
-        category = 'guns',
-        price = 4200,
-        level = 5,
-        weapon = 'WEAPON_MARKSMANRIFLE', -- SPAWN NAME — swap this
-        item = 'WEAPON_MARKSMANRIFLE',
-        ammo = 'ammo-rifle',
-    },
-    hunting_rifle_ridge = {
-        label = 'Chiliad Ridge Rifle',
-        description = 'Long glass for mountain lion country.',
-        category = 'guns',
-        price = 7800,
-        level = 7,
-        weapon = 'WEAPON_SNIPERRIFLE', -- SPAWN NAME — swap this
-        item = 'WEAPON_SNIPERRIFLE',
-        ammo = 'ammo-sniper',
-    },
-    hunting_rifle_apex = {
-        label = 'Rebel Apex',
-        description = 'Top-end hunting rifle. Required for panther country.',
-        category = 'guns',
-        price = 14500,
-        level = 9,
-        weapon = 'WEAPON_HEAVYSNIPER', -- SPAWN NAME — swap this
-        item = 'WEAPON_HEAVYSNIPER',
-        ammo = 'ammo-sniper',
-    },
-    ammo_musket = {
-        label = 'Musket Powder Loads',
-        description = 'Paper loads for the Trail Musket.',
-        category = 'ammo',
-        price = 8,
-        level = 1,
-        item = 'ammo-musket',
-        amount = 10,
-        weight = 15,
-    },
-    ammo_shotgun = {
-        label = 'Buckshot',
-        description = '12 gauge for the Chaparral.',
-        category = 'ammo',
-        price = 12,
-        level = 3,
-        item = 'ammo-shotgun',
-        amount = 12,
-        weight = 20,
-    },
-    ammo_rifle = {
-        label = 'Rifle Rounds',
-        description = 'Marksman rifle ammunition.',
-        category = 'ammo',
-        price = 16,
-        level = 5,
-        item = 'ammo-rifle',
-        amount = 20,
-        weight = 18,
-    },
-    ammo_sniper = {
-        label = 'Match Grade Slugs',
-        description = 'Long-range loads for ridge and apex rifles.',
-        category = 'ammo',
-        price = 28,
-        level = 7,
-        item = 'ammo-sniper',
-        amount = 10,
-        weight = 22,
-    },
-}
-
--- Weapons that count as a legal hunting kill (hashes resolved from Config.Equipment.weapon).
-Config.HuntingWeapons = {}
-for _, data in pairs(Config.Equipment) do
-    if data.weapon then
-        Config.HuntingWeapons[joaat(data.weapon)] = true
-    end
-end
-
-Config.ShopCatalogOrder = {
+-- Tools that can skin a carcass. hunting_axe plus stock ox melee sold at the lodge.
+Config.HarvestTools = {
     'hunting_axe',
-    'hunting_rifle_starter',
-    'hunting_rifle_field',
-    'hunting_rifle_marksman',
-    'hunting_rifle_ridge',
-    'hunting_rifle_apex',
-    'ammo_musket',
-    'ammo_shotgun',
-    'ammo_rifle',
-    'ammo_sniper',
+    'WEAPON_HATCHET',
+    'WEAPON_BATTLEAXE',
+    'WEAPON_STONE_HATCHET',
+    'WEAPON_MACHETE',
+    'WEAPON_KNIFE',
 }
+
+-- Store catalog (all base GTA ox_inventory firearms + ammo + harvest tools)
+-- is defined in data/equipment.lua after this file loads.
 
 ----------------------------------------------------------------
 -- Sellable harvest
@@ -252,36 +134,42 @@ Config.Materials = {
         description = 'Cleaned cuts. Rebel kitchens pay by the pound.',
         sell = 22,
         weight = 180,
+        image = 'images/animal_meat.png',
     },
     animal_leather = {
         label = 'Hide',
         description = 'Salted hide for the tannery.',
         sell = 34,
         weight = 220,
+        image = 'images/animal_leather.png',
     },
     animal_bones = {
         label = 'Bones',
         description = 'Clean bone for crafts and stock.',
         sell = 14,
         weight = 140,
+        image = 'images/animal_bones.png',
     },
     trophy_antler = {
         label = 'Trophy Antler',
         description = 'A heavy rack. Lodge wall money.',
         sell = 220,
         weight = 400,
+        image = 'images/trophy_antler.png',
     },
     trophy_fang = {
         label = 'Predator Fang',
         description = 'Taken from a legal mountain cat.',
         sell = 310,
         weight = 80,
+        image = 'images/trophy_fang.png',
     },
     trophy_pelt = {
         label = 'Rebel Pelt',
         description = 'Apex hide. Highest payout in the woods.',
         sell = 540,
         weight = 650,
+        image = 'images/trophy_pelt.png',
     },
 }
 
@@ -774,7 +662,7 @@ Config.DailyTasks = {
         type = 'harvest_rarity',
         rarities = { rare = true, legendary = true },
         count = 1,
-        reward = { money = 500, items = { { 'ammo_sniper', 2 } } },
+        reward = { money = 500, items = { { 'ammo-sniper', 2 } } },
     },
     {
         id = 'sell_cash',
