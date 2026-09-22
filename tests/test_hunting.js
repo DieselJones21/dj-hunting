@@ -73,9 +73,9 @@ const js = fs.readFileSync(path.join(root, 'html/app.js'), 'utf8');
 const config = fs.readFileSync(path.join(root, 'config.lua'), 'utf8');
 const locale = fs.readFileSync(path.join(root, 'locales/en.json'), 'utf8');
 
-assert.match(html, /Rebel Outfitters/);
-assert.match(html, /REBEL ROLEPLAY/);
-assert.match(css, /--cyan: #e8913a/);
+assert.match(html, /Rebel Hunting/);
+assert.match(html, /DJ FIVEM SCRIPTS/);
+assert.match(css, /--accent: #ff2a2a/);
 assert.match(js, /buyLicense/);
 assert.match(js, /SHOP_NAV/);
 assert.match(config, /WEAPON_MUSKET/);

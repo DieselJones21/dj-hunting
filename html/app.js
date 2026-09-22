@@ -33,7 +33,7 @@ const ICONS = {
   axe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 4l6 6-3 1-4-4 1-3z"/><path d="M12 8 4 20"/></svg>',
 };
 
-const BRAND_LOGO = `<svg class="empty-logo" viewBox="0 0 48 48"><path d="M24 6c-3 7-10 11-16 12 8 2 13 8 16 24 3-16 8-22 16-24-6-1-13-5-16-12z" fill="currentColor"/></svg>`;
+const BRAND_LOGO = '<img class="empty-logo" src="brand/logo.png" alt="DJ FiveM Scripts" decoding="async" draggable="false" />';
 
 function emptyState(title, copy) {
   return `<div class="empty">${BRAND_LOGO}<strong>${escapeHtml(title)}</strong><p>${escapeHtml(copy)}</p></div>`;
@@ -157,7 +157,7 @@ const state = {
   tab: 'all',
   query: '',
   qty: {},
-  shop: { label: 'Rebel Outfitters', subtitle: 'Ranger Lodge', views: ['license', 'shop', 'sell', 'field', 'tasks', 'board'], sellsLicense: true },
+  shop: { label: 'Rebel Hunting', subtitle: 'forest outfitter', views: ['license', 'shop', 'sell', 'field', 'tasks', 'board'], sellsLicense: true },
   player: { name: 'Hunter', cash: 0 },
   catalog: [],
   goods: [],
@@ -171,7 +171,7 @@ const state = {
   licensedFlag: false,
   license: { label: 'Rebel Hunting License', price: 450, owned: false, description: '' },
   resetsIn: 0,
-  brand: { name: 'Rebel Roleplay', role: 'Licensed Rebel hunter', initials: 'RR' },
+  brand: { name: 'Rebel Roleplay', role: 'Licensed hunter', initials: 'RR' },
   busy: false,
 };
 
@@ -357,9 +357,8 @@ function rankLabel(rank) {
 function renderNav() {
   const items = SHOP_NAV.filter((item) => allowedViews().includes(item.id));
   navEl.innerHTML = items.map((item) => `
-    <button type="button" class="nav-btn ${state.view === item.id ? 'active' : ''}" data-view="${item.id}">
+    <button type="button" class="nav-btn ${state.view === item.id ? 'active' : ''}" data-view="${item.id}" title="${item.label}" aria-label="${item.label}">
       ${ICONS[item.icon] || ''}
-      ${item.label}
     </button>
   `).join('');
 }
@@ -664,10 +663,10 @@ function renderBoard() {
 }
 
 function render() {
-  titleEl.textContent = state.shop.label || 'Rebel Outfitters';
-  subtitleEl.textContent = state.shop.subtitle || 'Ranger Lodge';
+  titleEl.textContent = state.shop.label || 'Rebel Hunting';
+  subtitleEl.textContent = state.shop.subtitle || 'forest outfitter';
   playerRoleEl.textContent = state.licensed
-    ? (state.brand.role || 'Licensed Rebel hunter')
+    ? (state.brand.role || 'Licensed hunter')
     : 'Unlicensed · see the ranger';
   content.classList.toggle('tasks-view', state.view === 'tasks');
   content.classList.toggle('board-view', state.view === 'board');
@@ -850,7 +849,7 @@ if (!inFiveM) {
   const licensed = params.get('licensed') !== '0';
   const demo = {
     view,
-    shop: { label: 'Rebel Ranger Lodge', subtitle: 'Licenses · guns · buyback', views: ['license', 'shop', 'sell', 'field', 'tasks', 'board'], sellsLicense: true },
+    shop: { label: 'Rebel Hunting', subtitle: 'forest outfitter', views: ['license', 'shop', 'sell', 'field', 'tasks', 'board'], sellsLicense: true },
     ...DEMO,
     licensed,
     licensedFlag: licensed,

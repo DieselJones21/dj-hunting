@@ -20,8 +20,8 @@ Config.Brand = {
     name = 'Rebel Roleplay',
     short = 'Rebel',
     initials = 'RR',
-    title = 'Rebel Outfitters',
-    role = 'Licensed Rebel hunter',
+    title = 'Rebel Hunting',
+    role = 'Licensed hunter',
 }
 
 -- darktrovx/interact (resource name: interact)
