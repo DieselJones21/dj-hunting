@@ -2,9 +2,10 @@
 -- (inside the existing `return { ... }` table, before the closing `}`).
 --
 -- Guns and ammo sold by Rebel Outfitters are stock ox_inventory items
--- (every base GTA firearm in data/weapons.lua that uses regular ammo,
+-- that fit hunting: pistols, field shotguns, rifles, musket / snipers,
 -- plus ammo-9 / 22 / 38 / 44 / 45 / 50 / rifle / rifle2 / shotgun /
--- sniper / heavysniper / musket). Those already ship with ox_inventory.
+-- sniper / heavysniper / musket. Those already ship with ox_inventory.
+-- SMGs and machine guns are not sold.
 --
 -- Copy PNGs from install/inventory_images/ into ox_inventory/web/images/
 -- so the inventory UI can show the generated hunting items (and the two

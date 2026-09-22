@@ -1,4 +1,5 @@
--- Stock ox_inventory firearms, ammo, and harvest tools sold at Rebel Outfitters.
+-- Hunting-fit ox_inventory firearms (pistols, shotguns, rifles, musket / snipers),
+-- ammo, and harvest tools sold at Rebel Outfitters. No SMGs or machine guns.
 -- Keys match ox_inventory item names. Lodge NUI icons live in html/images
 -- (copied from ox_inventory/web/images, plus generated custom / missing icons).
 
@@ -275,102 +276,8 @@ add(E, 'WEAPON_REVOLVER_MK2', {
 })
 
 ----------------------------------------------------------------
--- SMGs
+-- Shotguns (field / hunting 12ga + musket)
 ----------------------------------------------------------------
-add(E, 'WEAPON_MINISMG', {
-    label = 'Mini SMG',
-    description = 'Compact 9mm. Fast follow-ups in timber.',
-    category = 'smgs',
-    price = 1650,
-    level = 2,
-    weight = 1270,
-    weapon = true,
-    ammo = 'ammo-9',
-})
-add(E, 'WEAPON_MACHINEPISTOL', {
-    label = 'Machine Pistol',
-    description = 'Spray 9mm. Keep it legal and walk after the take.',
-    category = 'smgs',
-    price = 1450,
-    level = 2,
-    weight = 1400,
-    weapon = true,
-    ammo = 'ammo-9',
-})
-add(E, 'WEAPON_MICROSMG', {
-    label = 'Micro SMG',
-    description = '.45 compact. Brush country sidearm.',
-    category = 'smgs',
-    price = 2100,
-    level = 3,
-    weight = 3000,
-    weapon = true,
-    ammo = 'ammo-45',
-})
-add(E, 'WEAPON_SMG', {
-    label = 'SMG',
-    description = 'Service 9mm. Mid-woods workhorse.',
-    category = 'smgs',
-    price = 2400,
-    level = 3,
-    weight = 3084,
-    weapon = true,
-    ammo = 'ammo-9',
-})
-add(E, 'WEAPON_TECPISTOL', {
-    label = 'Tactical SMG',
-    description = 'Modern 9mm PDW. Tight groups on moving game.',
-    category = 'smgs',
-    price = 2650,
-    level = 4,
-    weight = 1500,
-    weapon = true,
-    ammo = 'ammo-9',
-})
-add(E, 'WEAPON_COMBATPDW', {
-    label = 'Combat PDW',
-    description = 'Carbine-length 9mm. Good in Paleto timber.',
-    category = 'smgs',
-    price = 2800,
-    level = 4,
-    weight = 2300,
-    weapon = true,
-    ammo = 'ammo-9',
-})
-add(E, 'WEAPON_ASSAULTSMG', {
-    label = 'Assault SMG',
-    description = 'Rifle-caliber SMG. Opens deer country early.',
-    category = 'smgs',
-    price = 3100,
-    level = 4,
-    weight = 2900,
-    weapon = true,
-    ammo = 'ammo-rifle',
-})
-add(E, 'WEAPON_SMG_MK2', {
-    label = 'SMG MK2',
-    description = 'Tuned 9mm. Ridge walks and cat country.',
-    category = 'smgs',
-    price = 4200,
-    level = 7,
-    weight = 2700,
-    weapon = true,
-    ammo = 'ammo-9',
-})
-
-----------------------------------------------------------------
--- Shotguns
-----------------------------------------------------------------
-add(E, 'WEAPON_MUSKET', {
-    label = 'Musket',
-    description = 'Old Rebel trail gun. Legal on rabbits, birds, and farm stock.',
-    category = 'shotguns',
-    price = 850,
-    level = 1,
-    weight = 4500,
-    weapon = true,
-    ammo = 'ammo-musket',
-})
 add(E, 'WEAPON_SAWNOFFSHOTGUN', {
     label = 'Sawn Off Shotgun',
     description = 'Short 12ga. Close brush and hogs.',
@@ -411,26 +318,6 @@ add(E, 'WEAPON_BULLPUPSHOTGUN', {
     weapon = true,
     ammo = 'ammo-shotgun',
 })
-add(E, 'WEAPON_COMBATSHOTGUN', {
-    label = 'Combat Shotgun',
-    description = 'Semi 12ga. Fast follow-ups on charging boar.',
-    category = 'shotguns',
-    price = 2600,
-    level = 4,
-    weight = 4400,
-    weapon = true,
-    ammo = 'ammo-shotgun',
-})
-add(E, 'WEAPON_AUTOSHOTGUN', {
-    label = 'Sweeper Shotgun',
-    description = 'Auto 12ga. Burns shells. Walk after the harvest.',
-    category = 'shotguns',
-    price = 2750,
-    level = 4,
-    weight = 4400,
-    weapon = true,
-    ammo = 'ammo-shotgun',
-})
 add(E, 'WEAPON_HEAVYSHOTGUN', {
     label = 'Heavy Shotgun',
     description = 'Box-fed 12ga. Thick hide country.',
@@ -438,16 +325,6 @@ add(E, 'WEAPON_HEAVYSHOTGUN', {
     price = 3200,
     level = 5,
     weight = 3600,
-    weapon = true,
-    ammo = 'ammo-shotgun',
-})
-add(E, 'WEAPON_ASSAULTSHOTGUN', {
-    label = 'Assault Shotgun',
-    description = 'Full-auto 12ga. Legal only with a Rebel license.',
-    category = 'shotguns',
-    price = 3400,
-    level = 5,
-    weight = 5200,
     weapon = true,
     ammo = 'ammo-shotgun',
 })
@@ -463,7 +340,7 @@ add(E, 'WEAPON_PUMPSHOTGUN_MK2', {
 })
 
 ----------------------------------------------------------------
--- Rifles + LMGs
+-- Rifles
 ----------------------------------------------------------------
 add(E, 'WEAPON_COMPACTRIFLE', {
     label = 'Compact Rifle',
@@ -504,16 +381,6 @@ add(E, 'WEAPON_ADVANCEDRIFLE', {
     weight = 3100,
     weapon = true,
     ammo = 'ammo-rifle',
-})
-add(E, 'WEAPON_GUSENBERG', {
-    label = 'Gusenberg',
-    description = '.45 drum. Old-school brush sweeper.',
-    category = 'rifles',
-    price = 4800,
-    level = 5,
-    weight = 4900,
-    weapon = true,
-    ammo = 'ammo-45',
 })
 add(E, 'WEAPON_SPECIALCARBINE', {
     label = 'Special Carbine',
@@ -575,16 +442,6 @@ add(E, 'WEAPON_HEAVYRIFLE', {
     weapon = true,
     ammo = 'ammo-rifle',
 })
-add(E, 'WEAPON_MG', {
-    label = 'Machine Gun',
-    description = 'Sustained 7.62. Legal only with papers. Walk after.',
-    category = 'rifles',
-    price = 7200,
-    level = 8,
-    weight = 9000,
-    weapon = true,
-    ammo = 'ammo-rifle2',
-})
 add(E, 'WEAPON_ASSAULTRIFLE_MK2', {
     label = 'Assault Rifle MK2',
     description = 'Tuned 7.62. High-country workhorse.',
@@ -625,34 +482,24 @@ add(E, 'WEAPON_BULLPUPRIFLE_MK2', {
     weapon = true,
     ammo = 'ammo-rifle',
 })
-add(E, 'WEAPON_COMBATMG', {
-    label = 'Combat MG',
-    description = 'Belt 5.56. Heavy and loud. Still a legal hunting gun.',
-    category = 'rifles',
-    price = 8800,
-    level = 9,
-    weight = 7500,
-    weapon = true,
-    ammo = 'ammo-rifle',
-})
-add(E, 'WEAPON_COMBATMG_MK2', {
-    label = 'Combat MG MK2',
-    description = 'Apex machine gun. Panther country only if you stay moving.',
-    category = 'rifles',
-    price = 11000,
-    level = 10,
-    weight = 8000,
-    weapon = true,
-    ammo = 'ammo-rifle2',
-})
 
 ----------------------------------------------------------------
--- Snipers
+-- Hunting weapons (musket + long glass)
 ----------------------------------------------------------------
+add(E, 'WEAPON_MUSKET', {
+    label = 'Musket',
+    description = 'Old Rebel trail gun. Legal on rabbits, birds, and farm stock.',
+    category = 'hunting',
+    price = 850,
+    level = 1,
+    weight = 4500,
+    weapon = true,
+    ammo = 'ammo-musket',
+})
 add(E, 'WEAPON_MARKSMANRIFLE', {
     label = 'Marksman Rifle',
     description = 'Semi 7.62. Opens deer and canyon game.',
-    category = 'snipers',
+    category = 'hunting',
     price = 4200,
     level = 6,
     weight = 7500,
@@ -662,7 +509,7 @@ add(E, 'WEAPON_MARKSMANRIFLE', {
 add(E, 'WEAPON_PRECISIONRIFLE', {
     label = 'Precision Rifle',
     description = 'Bolt 7.62. One clean shot, then walk.',
-    category = 'snipers',
+    category = 'hunting',
     price = 7200,
     level = 7,
     weight = 4800,
@@ -672,7 +519,7 @@ add(E, 'WEAPON_PRECISIONRIFLE', {
 add(E, 'WEAPON_SNIPERRIFLE', {
     label = 'Sniper Rifle',
     description = 'Long glass for mountain lion country.',
-    category = 'snipers',
+    category = 'hunting',
     price = 7800,
     level = 7,
     weight = 5000,
@@ -682,7 +529,7 @@ add(E, 'WEAPON_SNIPERRIFLE', {
 add(E, 'WEAPON_MARKSMANRIFLE_MK2', {
     label = 'Marksman Rifle MK2',
     description = 'Tuned marksman. Cat country glass.',
-    category = 'snipers',
+    category = 'hunting',
     price = 9200,
     level = 8,
     weight = 4000,
@@ -692,7 +539,7 @@ add(E, 'WEAPON_MARKSMANRIFLE_MK2', {
 add(E, 'WEAPON_HEAVYSNIPER', {
     label = 'Heavy Sniper',
     description = '.50 BMG. Top-end hunting rifle for panther country.',
-    category = 'snipers',
+    category = 'hunting',
     price = 14500,
     level = 9,
     weight = 12700,
@@ -702,7 +549,7 @@ add(E, 'WEAPON_HEAVYSNIPER', {
 add(E, 'WEAPON_HEAVYSNIPER_MK2', {
     label = 'Heavy Sniper MK2',
     description = 'Apex .50. Highest Rebel glass on the mountain.',
-    category = 'snipers',
+    category = 'hunting',
     price = 18500,
     level = 10,
     weight = 14000,
@@ -715,7 +562,7 @@ add(E, 'WEAPON_HEAVYSNIPER_MK2', {
 ----------------------------------------------------------------
 add(E, 'ammo-9', {
     label = '9mm',
-    description = 'Pistol and SMG ammunition.',
+    description = 'Pistol ammunition.',
     category = 'ammo',
     price = 12,
     level = 1,
@@ -724,7 +571,7 @@ add(E, 'ammo-9', {
 })
 add(E, 'ammo-45', {
     label = '.45 ACP',
-    description = 'SNS, heavy pistol, Micro SMG, Gusenberg.',
+    description = 'SNS and heavy pistol ammunition.',
     category = 'ammo',
     price = 13,
     level = 1,
@@ -835,11 +682,10 @@ end
 local categoryOrder = {
     tools = 1,
     pistols = 2,
-    smgs = 3,
-    shotguns = 4,
-    rifles = 5,
-    snipers = 6,
-    ammo = 7,
+    shotguns = 3,
+    rifles = 4,
+    hunting = 5,
+    ammo = 6,
 }
 
 local order = {}

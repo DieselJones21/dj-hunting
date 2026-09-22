@@ -1,6 +1,6 @@
 # Rebel Hunting
 
-XP hunting for FiveM, branded for **Rebel Roleplay**. Players buy a **hunting license** from the ranger, kit up at Rebel Outfitters (axe + ranked **base GTA guns**), walk **logical San Andreas grounds**, harvest with an **axe**, and sell **meat, hide, bone, and trophies** through a modern lodge UI.
+XP hunting for FiveM, branded for **Rebel Roleplay**. Players buy a **hunting license** from the ranger, kit up at Rebel Outfitters (axe + ranked **pistols, shotguns, rifles, and hunting guns**), walk **logical San Andreas grounds**, harvest with an **axe**, and sell **meat, hide, bone, and trophies** through a modern lodge UI.
 
 You cannot camp a spot and farm. After every harvest the woods go quiet until you **walk off the carcass** and wait out the search cooldown.
 
@@ -16,10 +16,14 @@ You cannot camp a spot and farm. After every harvest the woods go quiet until yo
 1. Drop this folder into `resources` as `dj-hunting`.
 2. Open `ox_inventory/data/items.lua` and paste the item blocks from `install/ox_inventory_items.lua` **inside** the existing `return { ... }` table. Do not replace the whole file.
 3. Copy `install/inventory_images/*.png` into `ox_inventory/web/images/` so ox_inventory can show the generated hunting items (license, axe, harvest, trophies) and the two DLC rifles ox_inventory does not ship icons for (`WEAPON_TACTICALRIFLE`, `WEAPON_BATTLERIFLE`).
-4. Guns and ammo are **stock ox_inventory items** — every base GTA firearm that uses regular ammo, plus:
+4. Guns and ammo are **stock ox_inventory items** that fit hunting:
+   - Pistols and revolvers
+   - Field shotguns (pump, double barrel, sawn-off, bullpup, heavy)
+   - Rifles and carbines
+   - Hunting guns (musket, marksman, sniper, precision, heavy sniper)
    - `ammo-9` `ammo-22` `ammo-38` `ammo-44` `ammo-45` `ammo-50`
    - `ammo-rifle` `ammo-rifle2` `ammo-shotgun` `ammo-sniper` `ammo-heavysniper` `ammo-musket`
-   Launchers, ray/rail guns, and throwables are not sold.
+   SMGs, machine guns, launchers, ray/rail guns, and throwables are not sold.
 5. Restart `ox_inventory`, then start this resource:
 
 ```cfg
@@ -85,7 +89,7 @@ Blips are on. Zones sit on real wildlife country, not downtown:
 Same modern card layout as the fishing script, Rebel-branded (ember / charcoal):
 
 - **License** — buy papers from the ranger
-- **Store** — axe, all base GTA guns, ammo (locked without a license)
+- **Store** — axe, pistols, shotguns, rifles, hunting guns, ammo (locked without a license)
 - **Sell** — meat, hide, bone, trophies
 - **Field** — bestiary with rank locks and estimated payout
 - **Tasks** — daily walks, claimed at the lodge
@@ -100,5 +104,5 @@ Outfitters: Rebel Ranger Lodge, Grapeseed Outfitters, Senora Trading Post, Chili
 Open `html/index.html` in a browser (outside FiveM). Query flags:
 
 - `?view=shop` `sell` `license` `field` `tasks` `board`
-- `?tab=pistols` `smgs` `shotguns` `rifles` `snipers` `ammo` `tools`
+- `?tab=pistols` `shotguns` `rifles` `hunting` `ammo` `tools`
 - `?licensed=0` to see the locked store
