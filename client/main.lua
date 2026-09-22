@@ -1,0 +1,539 @@
+lib.locale()
+
+local spawnedBlips = {}
+local radiusBlips = {}
+local shopPeds = {}
+local shopOpen = false
+local currentShopId
+local cachedCatalog
+
+CurrentZone = nil
+HunterState = {
+    licensed = false,
+    hunter = { level = 1, xp = 0, toNext = 120, max = 10, harvests = 0 },
+}
+
+function IsOutfitterOpen()
+    return shopOpen
+end
+
+function IsShopOpen()
+    return shopOpen
+end
+
+local function notify(key, nType, ...)
+    lib.notify({
+        title = Config.Brand.title or 'Rebel Hunting',
+        description = locale(key, ...),
+        type = nType or 'inform',
+    })
+end
+
+Notify = notify
+
+local function nuiCall(name, data)
+    SendNUIMessage({ action = name, data = data or {} })
+end
+
+local function closeShop()
+    if not shopOpen then return end
+    shopOpen = false
+    currentShopId = nil
+    SetNuiFocus(false, false)
+    nuiCall('close')
+end
+
+CloseShop = closeShop
+
+local function catalogFromConfig()
+    if cachedCatalog then return cachedCatalog end
+
+    local items = {}
+    for i = 1, #Config.ShopCatalogOrder do
+        local name = Config.ShopCatalogOrder[i]
+        local data = Config.Equipment[name]
+        if data then
+            local give = data.item or data.weapon or name
+            items[#items + 1] = {
+                item = name,
+                give = give,
+                label = data.label,
+                description = data.description,
+                category = data.category,
+                price = data.price,
+                level = data.level or 1,
+                weapon = data.weapon,
+                ammo = data.ammo,
+                amount = data.amount or 1,
+                image = data.image or Config.ItemImage(give),
+            }
+        end
+    end
+    cachedCatalog = items
+    return items
+end
+
+local function openShop(shop, view)
+    if shopOpen or IsHarvesting() then return end
+    local payload = lib.callback.await('dj-hunting:openShop', false, shop.id)
+    if not payload or not payload.ok then
+        notify(payload and payload.error or 'notify_too_far', 'error')
+        return
+    end
+
+    if payload.hunter then
+        HunterState.hunter = payload.hunter
+        HunterState.licensed = payload.licensed == true
+    end
+
+    shopOpen = true
+    currentShopId = shop.id
+    SetNuiFocus(true, true)
+
+    local allowed = shop.views or Config.ShopViews
+    local fallback = shop.defaultView or 'shop'
+    if not payload.licensed and shop.sellsLicense then
+        fallback = 'license'
+    elseif not payload.licensed then
+        fallback = 'license'
+    end
+    if view and allowed then
+        fallback = view
+    end
+
+    nuiCall('open', {
+        ok = true,
+        view = fallback,
+        shop = {
+            id = shop.id,
+            label = shop.label,
+            subtitle = shop.subtitle,
+            sellsLicense = shop.sellsLicense == true,
+            views = allowed,
+        },
+        player = payload.player,
+        catalog = catalogFromConfig(),
+        goods = payload.goods or {},
+        field = payload.field or {},
+        equipment = payload.equipment or {},
+        licensed = payload.licensed == true,
+        licensedFlag = payload.licensedFlag == true,
+        license = payload.license,
+        tasks = payload.tasks or {},
+        board = payload.board or {},
+        you = payload.you or {},
+        hunter = payload.hunter or HunterState.hunter,
+        resetsIn = payload.resetsIn or 0,
+        brand = Config.Brand,
+    })
+end
+
+OpenShop = openShop
+
+local function waitForInteract()
+    if GetResourceState('interact') == 'started' then
+        return true
+    end
+
+    local started = pcall(function()
+        lib.waitFor(function()
+            return GetResourceState('interact') == 'started' or nil
+        end, 'interact resource is not started', 15000)
+    end)
+
+    return started and GetResourceState('interact') == 'started'
+end
+
+local function addInteract(entity, shop)
+    local id = 'dj_hunting_' .. shop.id
+    local options = {}
+
+    if shop.sellsLicense then
+        options[#options + 1] = {
+            label = locale('shop_license'),
+            action = function()
+                openShop(shop, 'license')
+            end,
+        }
+    end
+
+    options[#options + 1] = {
+        label = locale('shop_open'),
+        action = function()
+            openShop(shop, payloadView(shop, 'shop'))
+        end,
+    }
+    options[#options + 1] = {
+        label = locale('shop_sell'),
+        action = function()
+            openShop(shop, payloadView(shop, 'sell'))
+        end,
+    }
+
+    exports.interact:AddLocalEntityInteraction({
+        entity = entity,
+        id = id,
+        name = id,
+        distance = Config.Interact.distance,
+        interactDst = Config.Interact.interactDst,
+        offset = Config.Interact.offset,
+        ignoreLos = false,
+        options = options,
+    })
+    return id
+end
+
+function payloadView(shop, view)
+    if shop.sellsLicense then return view end
+    return view
+end
+
+local function createShopBlip(shop)
+    if not shop.blip then return end
+    local blip = AddBlipForCoord(shop.coords.x, shop.coords.y, shop.coords.z)
+    SetBlipSprite(blip, shop.blip.sprite)
+    SetBlipDisplay(blip, 4)
+    SetBlipScale(blip, shop.blip.scale)
+    SetBlipColour(blip, shop.blip.color)
+    SetBlipAsShortRange(blip, true)
+    BeginTextCommandSetBlipName('STRING')
+    AddTextComponentString(shop.blip.label)
+    EndTextCommandSetBlipName(blip)
+    spawnedBlips[#spawnedBlips + 1] = blip
+end
+
+local function spawnShopPed(shop, useInteract)
+    if shopPeds[shop.id] and DoesEntityExist(shopPeds[shop.id].entity) then
+        return
+    end
+
+    lib.requestModel(shop.ped, 5000)
+    local ped = CreatePed(0, shop.ped, shop.coords.x, shop.coords.y, shop.coords.z - 1.0, shop.coords.w, false, true)
+    SetEntityAsMissionEntity(ped, true, true)
+    SetPedFleeAttributes(ped, 0, false)
+    SetPedDiesWhenInjured(ped, false)
+    SetPedKeepTask(ped, true)
+    SetBlockingOfNonTemporaryEvents(ped, true)
+    SetEntityInvincible(ped, true)
+    FreezeEntityPosition(ped, true)
+    SetPedCanRagdollFromPlayerImpact(ped, false)
+    SetModelAsNoLongerNeeded(shop.ped)
+
+    if shop.scenario then
+        TaskStartScenarioInPlace(ped, shop.scenario, 0, true)
+    end
+
+    local interactId
+    if useInteract then
+        interactId = addInteract(ped, shop)
+    end
+
+    shopPeds[shop.id] = { entity = ped, interactId = interactId }
+end
+
+local function despawnShopPed(shop)
+    local entry = shopPeds[shop.id]
+    if not entry then return end
+
+    if entry.interactId and GetResourceState('interact') == 'started' then
+        pcall(function()
+            exports.interact:RemoveLocalEntityInteraction(entry.entity, entry.interactId)
+        end)
+    end
+
+    if DoesEntityExist(entry.entity) then
+        DeleteEntity(entry.entity)
+    end
+
+    shopPeds[shop.id] = nil
+end
+
+local function createZoneBlip(zone)
+    local style = Config.ZoneBlip[zone.type]
+    if not style then return end
+
+    local blip = AddBlipForCoord(zone.coords.x, zone.coords.y, zone.coords.z)
+    SetBlipSprite(blip, style.sprite or Config.ZoneBlip.sprite or 141)
+    SetBlipDisplay(blip, 4)
+    SetBlipScale(blip, style.scale or Config.ZoneBlip.scale or 0.7)
+    SetBlipColour(blip, style.color)
+    SetBlipAsShortRange(blip, Config.ZoneBlip.shortRange ~= false)
+    BeginTextCommandSetBlipName('STRING')
+    AddTextComponentString(style.label or zone.name)
+    EndTextCommandSetBlipName(blip)
+    spawnedBlips[#spawnedBlips + 1] = blip
+
+    if Config.ShowZoneRadius then
+        local radius = AddBlipForRadius(zone.coords.x, zone.coords.y, zone.coords.z, zone.radius)
+        SetBlipColour(radius, style.color)
+        SetBlipAlpha(radius, style.alpha or 55)
+        radiusBlips[#radiusBlips + 1] = radius
+    end
+end
+
+local function setupZones()
+    local zones = Config.Zones
+    local zoneCount = #zones
+
+    if Config.ShowZoneBlips then
+        for i = 1, zoneCount do
+            createZoneBlip(zones[i])
+        end
+    end
+
+    CreateThread(function()
+        while true do
+            local coords = GetEntityCoords(cache.ped)
+            local found, nearestSq
+
+            for i = 1, zoneCount do
+                local zone = zones[i]
+                local dx = coords.x - zone.coords.x
+                local dy = coords.y - zone.coords.y
+                local distSq = dx * dx + dy * dy
+                if distSq <= zone.radiusSq then
+                    found = zone
+                    break
+                end
+                if not nearestSq or distSq < nearestSq then
+                    nearestSq = distSq
+                end
+            end
+
+            if found then
+                if not CurrentZone or CurrentZone.id ~= found.id then
+                    CurrentZone = found
+                    notify('zone_enter', 'inform', found.name, found.hint or found.type)
+                end
+                Wait(Config.ZoneCheck.inside)
+            else
+                if CurrentZone then
+                    CurrentZone = nil
+                end
+                local wait = Config.ZoneCheck.far
+                if nearestSq and nearestSq < Config.ZoneCheck.nearbySq then
+                    wait = Config.ZoneCheck.nearby
+                end
+                Wait(wait)
+            end
+        end
+    end)
+end
+
+local function streamShopPeds(useInteract)
+    local spawnSq = Config.PedSpawn.distanceSq
+    local despawnSq = Config.PedSpawn.despawnSq
+
+    CreateThread(function()
+        while true do
+            local coords = GetEntityCoords(cache.ped)
+            for i = 1, #Config.Shops do
+                local shop = Config.Shops[i]
+                local dx = coords.x - shop.coords.x
+                local dy = coords.y - shop.coords.y
+                local distSq = dx * dx + dy * dy
+                if distSq <= spawnSq then
+                    spawnShopPed(shop, useInteract)
+                elseif distSq >= despawnSq then
+                    despawnShopPed(shop)
+                end
+            end
+            Wait(Config.PedSpawn.interval)
+        end
+    end)
+end
+
+local function refreshState()
+    local payload = lib.callback.await('dj-hunting:state', false)
+    if payload and payload.ok then
+        HunterState.licensed = payload.licensed == true
+        if payload.hunter then
+            HunterState.hunter = payload.hunter
+        end
+    end
+    return payload
+end
+
+CreateThread(function()
+    local useInteract = waitForInteract()
+    if not useInteract then
+        lib.print.error('interact is not started. Shop peds require the interact resource.')
+        notify('notify_need_interact', 'error')
+    end
+
+    for i = 1, #Config.Shops do
+        createShopBlip(Config.Shops[i])
+    end
+
+    setupZones()
+    streamShopPeds(useInteract)
+    refreshState()
+end)
+
+RegisterNetEvent('dj-hunting:sync', function(payload)
+    if type(payload) ~= 'table' then return end
+    HunterState.licensed = payload.licensed == true
+    if payload.hunter then
+        HunterState.hunter = payload.hunter
+    end
+end)
+
+local function refreshFromServer()
+    if not shopOpen or not currentShopId then return nil end
+    return lib.callback.await('dj-hunting:openShop', false, currentShopId)
+end
+
+RegisterNUICallback('close', function(_, cb)
+    if shopOpen then
+        shopOpen = false
+        currentShopId = nil
+    end
+    SetNuiFocus(false, false)
+    cb({ ok = true })
+end)
+
+local function shopGuard()
+    return shopOpen and type(currentShopId) == 'string'
+end
+
+local function applyError(result)
+    if not result then
+        notify('notify_invalid', 'error')
+        return
+    end
+    if result.errorArg2 then
+        notify(result.error, 'error', result.errorArg, result.errorArg2)
+    elseif result.errorArg then
+        notify(result.error, 'error', result.errorArg)
+    else
+        notify(result.error or 'notify_invalid', 'error')
+    end
+end
+
+RegisterNUICallback('buyLicense', function(_, cb)
+    if not shopGuard() then
+        cb({ ok = false, error = 'notify_too_far' })
+        return
+    end
+    local result = lib.callback.await('dj-hunting:buyLicense', false, currentShopId)
+    if result and result.ok then
+        notify(result.replaced and 'notify_license_replaced' or 'notify_licensed', 'success')
+        HunterState.licensed = true
+        if result.refresh and result.refresh.hunter then
+            HunterState.hunter = result.refresh.hunter
+        end
+        result.refresh = result.refresh or refreshFromServer()
+    else
+        applyError(result)
+    end
+    cb(result or { ok = false })
+end)
+
+RegisterNUICallback('buy', function(data, cb)
+    if not shopGuard() then
+        cb({ ok = false, error = 'notify_too_far' })
+        return
+    end
+    local result = lib.callback.await('dj-hunting:buy', false, currentShopId, data and data.item, data and data.amount)
+    if result and result.ok then
+        notify('notify_bought', 'success', result.amount, result.label, result.total)
+        result.refresh = refreshFromServer()
+    else
+        applyError(result)
+    end
+    cb(result or { ok = false })
+end)
+
+RegisterNUICallback('sell', function(data, cb)
+    if not shopGuard() then
+        cb({ ok = false, error = 'notify_too_far' })
+        return
+    end
+    local result = lib.callback.await('dj-hunting:sell', false, currentShopId, data and data.item, data and data.amount)
+    if result and result.ok then
+        notify('notify_sold', 'success', result.amount, result.label, result.total)
+        result.refresh = refreshFromServer()
+    else
+        applyError(result)
+    end
+    cb(result or { ok = false })
+end)
+
+RegisterNUICallback('sellAll', function(_, cb)
+    if not shopGuard() then
+        cb({ ok = false, error = 'notify_too_far' })
+        return
+    end
+    local result = lib.callback.await('dj-hunting:sellAll', false, currentShopId)
+    if result and result.ok then
+        notify('notify_sold_all', 'success', result.total)
+        result.refresh = refreshFromServer()
+    else
+        applyError(result)
+    end
+    cb(result or { ok = false })
+end)
+
+RegisterNUICallback('refresh', function(_, cb)
+    if not shopGuard() then
+        cb({ ok = false })
+        return
+    end
+    cb(refreshFromServer() or { ok = false })
+end)
+
+RegisterNUICallback('claimTask', function(data, cb)
+    if not shopGuard() then
+        cb({ ok = false, error = 'notify_too_far' })
+        return
+    end
+    local result = lib.callback.await('dj-hunting:claimTask', false, currentShopId, data and data.id)
+    if result and result.ok then
+        notify('notify_task_claimed', 'success', result.label, result.money or 0)
+        result.refresh = refreshFromServer()
+    else
+        applyError(result)
+    end
+    cb(result or { ok = false })
+end)
+
+lib.addKeybind({
+    name = 'rebel_hunting_status',
+    description = 'Rebel hunting status',
+    defaultKey = 'F7',
+    onPressed = function()
+        refreshState()
+        local h = HunterState.hunter or {}
+        lib.notify({
+            title = Config.Brand.title,
+            description = ('Level %s  ·  %s XP  ·  %s harvests%s'):format(
+                h.level or 1,
+                h.xp or 0,
+                h.harvests or 0,
+                HunterState.licensed and '' or '  ·  no license'
+            ),
+            type = 'inform',
+        })
+    end,
+})
+
+AddEventHandler('onResourceStop', function(resource)
+    if resource ~= GetCurrentResourceName() then return end
+    closeShop()
+    for _, shop in pairs(shopPeds) do
+        if shop.interactId and GetResourceState('interact') == 'started' then
+            pcall(function()
+                exports.interact:RemoveLocalEntityInteraction(shop.entity, shop.interactId)
+            end)
+        end
+        if DoesEntityExist(shop.entity) then
+            DeleteEntity(shop.entity)
+        end
+    end
+    for i = 1, #spawnedBlips do
+        RemoveBlip(spawnedBlips[i])
+    end
+    for i = 1, #radiusBlips do
+        RemoveBlip(radiusBlips[i])
+    end
+end)
